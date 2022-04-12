@@ -1,0 +1,54 @@
+/*Query 1*/
+SELECT DISTINCT g.Name ,count(*) totalListener
+from Customer c
+join Invoice i on c.CustomerId=i.CustomerId
+join InvoiceLine il on i.InvoiceId=il.InvoiceId
+join Track t on il.TrackId=t.TrackId
+join Genre g on g.GenreId=t.GenreId 
+GROUP by 1
+order by 2 desc
+
+
+
+/*Query 2*/
+SELECT Artist.ArtistId,Artist.Name,sum(total)/count(*) ProfitRate,count(*) totalTracks
+from Artist 
+join Album on Album.ArtistId=Artist.ArtistId
+join track  on Track.AlbumId=Album.AlbumId
+join Genre on Genre.GenreId=Track.GenreId
+join InvoiceLine on Track.TrackId=InvoiceLine.TrackId
+join Invoice on Invoice.InvoiceId=InvoiceLine.InvoiceId
+group by 1
+order by 3 DESC
+LIMIT 20
+
+
+/*Query3*/
+with t1 as(select Customer.Country,sum(invoice.total) TotalSpent,Customer.FirstName,Customer.LastName,Customer.CustomerId
+from customer
+join invoice on invoice.CustomerId=Customer.CustomerId
+group by 5
+order by 2 desc)
+SELECT t1.country , t1.TotalSpent,t1.FirstName,t1.LastName,t1.CustomerId
+from t1
+inner join ( select Country,max(TotalSpent) totalSpent from t1 group by 1 ) as t2 on t1.Country = t2.Country and t1.TotalSpent=t2.totalSpent
+order by 1
+
+/*Query4*/
+
+with t1 as (
+select Genre.name name,Genre.GenreId id ,sum(InvoiceLine.Quantity) purchaes,Customer.Country co
+from Invoice
+join InvoiceLine on Invoice.InvoiceId=InvoiceLine.InvoiceId
+join track on Track.TrackId=InvoiceLine.TrackId
+join Customer on Customer.CustomerId=Invoice.CustomerId
+join Genre on Genre.GenreId=Track.GenreId
+group by 2,4
+order by 4
+)
+select t1.purchaes Purchases,t1.co Country ,t1.name Name,t1.id GenreId
+ from t1
+inner join (select co as Country,max(purchaes) purchaes from t1 group by 1)as t2 on t2.purchaes=t1.purchaes and t2.Country=t1.co 
+where Name ='Rock'
+order by 1 desc
+limit 12 
